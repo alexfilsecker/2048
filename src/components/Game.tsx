@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Number } from "./Number";
 import { Grid } from "./Grix";
 import GameLogic, { Dir } from "../Logic/GameLogic";
@@ -17,8 +17,8 @@ export function Game() {
   const [loose, setLoose] = useState(false);
 
   const swipeRef = useRef<HTMLDivElement>(null);
-  let startX: number = 0;
-  let startY: number = 0;
+  const startX = useRef<number | null>(null);
+  const startY = useRef<number | null>(null);
 
   useEffect(() => {
     setGame();
@@ -26,6 +26,21 @@ export function Game() {
 
   function setGame() {
     setGameObjects([...gameLogic.game.flat(2).sort((a, b) => a.key - b.key)]);
+  }
+
+  function move(dir: Dir) {
+    const changed = gameLogic.moveDir(dir);
+    if (changed) {
+      setGame();
+      setTimeout(() => {
+        gameLogic.merge();
+        gameLogic.addRandomNumber();
+        if (gameLogic.checkLoose()) {
+          setLoose(true);
+        }
+        setGame();
+      }, 150);
+    }
   }
 
   useEffect(() => {
@@ -40,55 +55,41 @@ export function Game() {
       };
       if (Object.keys(keyToDir).includes(event.key)) {
         let key: string = event.key;
-        const changed = gameLogic.moveDir(keyToDir[key]);
-        if (changed) {
-          setGame();
-          setTimeout(() => {
-            gameLogic.merge();
-            gameLogic.addRandomNumber();
-            if (gameLogic.checkLoose()) {
-              setLoose(true);
-            }
-            setGame();
-          }, 150);
-        }
+        move(keyToDir[key]);
       }
     };
 
     const handleTouchStart = (event: TouchEvent) => {
-      startX = event.touches[0].clientX;
-      startY = event.touches[0].clientY;
+      const touch = event.touches[0];
+      startX.current = touch.clientX;
+      startY.current = touch.clientY;
     };
 
     const handleTouchEnd = (event: TouchEvent) => {
-      const diffX = event.changedTouches[0].clientX - startX;
-      const diffY = event.changedTouches[0].clientY - startY;
-      let dirSwipe: Dir;
-      if (Math.abs(diffX) > Math.abs(diffY)) {
-        if (diffX > 0) {
+      const touch = event.changedTouches[0];
+      const deltaX = touch.clientX - startX.current!;
+      const deltaY = touch.clientY - startY.current!;
+
+      let dirSwipe: Dir | null = null;
+      if (deltaX > deltaY) {
+        if (deltaX > 0) {
           dirSwipe = Dir.RIGHT;
         } else {
           dirSwipe = Dir.LEFT;
         }
       } else {
-        if (diffY > 0) {
+        if (deltaY > 0) {
           dirSwipe = Dir.DOWN;
         } else {
           dirSwipe = Dir.UP;
         }
       }
-      const changed = gameLogic.moveDir(dirSwipe);
-      if (changed) {
-        setGame();
-        setTimeout(() => {
-          gameLogic.merge();
-          gameLogic.addRandomNumber();
-          if (gameLogic.checkLoose()) {
-            setLoose(true);
-          }
-          setGame();
-        }, 150);
+
+      if (dirSwipe !== null) {
+        move(dirSwipe);
       }
+      startX.current = null;
+      startY.current = null;
     };
 
     document.addEventListener("keydown", handleKeyDown);

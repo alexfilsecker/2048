@@ -18,6 +18,8 @@ body {
 
 .main h1 {
   font-size: 50px;
+  margin-top: 15px;
+  margin-bottom: 0px;
 }
 
 .win-loose {

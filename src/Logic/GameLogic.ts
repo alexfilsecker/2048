@@ -15,12 +15,16 @@ export enum Dir {
 class GameLogic {
   game: GameObject[][][];
   keyCounter: number;
+  score: number;
+  latestScore: number;
 
   constructor() {
     this.game = Array.from({ length: 4 }, () =>
       Array.from({ length: 4 }, () => [])
     );
     this.keyCounter = 0;
+    this.score = 0;
+    this.latestScore = 0;
     this.addRandomNumber();
     this.addRandomNumber();
   }
@@ -224,12 +228,14 @@ class GameLogic {
   }
 
   merge() {
+    this.latestScore = 0;
     this.game.forEach((row, rowIndex) => {
       row.forEach((numArray, colIndex) => {
         if (numArray.length === 2) {
           if (numArray[0].value === numArray[1].value) {
             let newNum = numArray.splice(0, 2)[0];
             newNum.value = newNum.value * 2;
+            this.latestScore += newNum.value;
             newNum.key = this.keyCounter;
             this.keyCounter += 1;
             this.game[rowIndex][colIndex].push(newNum);
@@ -237,6 +243,7 @@ class GameLogic {
         }
       });
     });
+    this.score += this.latestScore;
   }
 }
 
