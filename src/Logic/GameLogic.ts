@@ -29,6 +29,17 @@ class GameLogic {
     this.addRandomNumber();
   }
 
+  reset() {
+    this.game = Array.from({ length: 4 }, () =>
+      Array.from({ length: 4 }, () => [])
+    );
+    this.keyCounter = 0;
+    this.score = 0;
+    this.latestScore = 0;
+    this.addRandomNumber();
+    this.addRandomNumber();
+  }
+
   findEmptyIndexes(): number[][] {
     const indexes: number[][] = [];
     this.game.forEach((rowList, rowIndex) => {

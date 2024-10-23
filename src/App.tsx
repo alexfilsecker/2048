@@ -1,12 +1,20 @@
+import { useState } from "react";
 import { Game } from "./components/Game";
+import Title from "./components/Title";
 import "./styles.css";
 
 function App() {
+  const [newGame, setNewGame] = useState(false);
+
   return (
     <div className="main">
-      <h1>2048</h1>
-      <p>Use the ArrowKeys to move the tiles.</p>
-      <Game />
+      <Title setNewGame={setNewGame} />
+      <Game
+        newGame={newGame}
+        resetNewGame={() => {
+          setNewGame(false);
+        }}
+      />
     </div>
   );
 }

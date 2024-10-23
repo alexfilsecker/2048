@@ -12,7 +12,12 @@ type GameObject = {
 
 const gameLogic = new GameLogic();
 
-export function Game() {
+type GameProps = {
+  newGame: boolean;
+  resetNewGame: () => void;
+};
+
+export function Game({ newGame, resetNewGame }: GameProps) {
   const [gameObjects, setGameObjects] = useState<GameObject[]>([]);
   const [loose, setLoose] = useState(false);
 
@@ -106,6 +111,15 @@ export function Game() {
       }
     };
   });
+
+  useEffect(() => {
+    if (newGame) {
+      gameLogic.reset();
+      resetNewGame();
+      setGame();
+      setLoose(false);
+    }
+  }, [newGame, resetNewGame]);
 
   return (
     <div className="grid" ref={swipeRef}>
